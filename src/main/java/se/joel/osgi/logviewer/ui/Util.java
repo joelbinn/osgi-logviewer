@@ -99,17 +99,22 @@ public class Util {
             return "N/A";
         }
 
-        return logEntry.getBundle().getBundleContext().getService(logEntry.getServiceReference()).getClass().getName();
+        Object service = logEntry.getBundle().getBundleContext().getService(logEntry.getServiceReference());
+        if (service == null) {
+            return "N/A";
+        }
+
+        return service.getClass().getName();
     }
 
     static String makeString(LogEntry logEntry) {
-        return timeToString(logEntry) + " " +
-            levelToString(logEntry) + " " +
-            getBundleName(logEntry) + " " +
-            getBundleId(logEntry) + " " +
-            getLocation(logEntry) + " " +
-            getService(logEntry) + " " +
-            logEntry.getMessage()
+        return "time="+timeToString(logEntry) + ";" +
+            "level="+levelToString(logEntry) + ";" +
+            "bundlename="+getBundleName(logEntry) + ";" +
+            "bundleid="+getBundleId(logEntry) + ";" +
+            "location="+getLocation(logEntry) + ";" +
+            "service="+getService(logEntry) + ";" +
+            "message="+logEntry.getMessage()
             ;
     }
 }

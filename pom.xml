@@ -8,7 +8,7 @@
     <artifactId>logviewer</artifactId>
     <version>1.0</version>
     <packaging>bundle</packaging>
-    <name>A swing based log viewer for the OSGi log service.</name>
+    <name>Log viewer for the OSGi log service.</name>
 
     <dependencies>
         <dependency>
@@ -45,11 +45,12 @@
                         <Bundle-Name>${project.name} - ${project.version}</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>
+                            javax.swing.*,
                             org.osgi.*;version="[1.0,2.0)"
                         </Import-Package>
                         <Private-Package>
                             se.joel.osgi.logviewer.*,
-                            net.miginfocom.swing
+                            net.miginfocom.*
                         </Private-Package>
                         <Service-Component>
                             se.joel.osgi.logviewer.Main;

@@ -20,6 +20,8 @@ public class DetailsPanel extends JPanel {
     private JTextField bundleLocationTextField;
     private JTextField bundleStateTextField;
     private JTextField serviceTextField;
+    private JTextArea messageTextArea;
+    private JTextField rawLogStringTextField;
 
     {
         // Time: <time> Bundle ID: <id> Location: <location> 
@@ -57,6 +59,17 @@ public class DetailsPanel extends JPanel {
         serviceTextField = new JTextField("");
         serviceTextField.setEditable(false);
         add(serviceTextField, "span, growx, wrap");
+
+        add(new JLabel("Raw log string:"));
+        rawLogStringTextField = new JTextField("");
+        add(rawLogStringTextField, "span, growx, wrap");
+
+        add(new JLabel("Message:"));
+        messageTextArea = new JTextArea("");
+        messageTextArea.setRows(4);
+        messageTextArea.setEditable(false);
+        JScrollPane messageTextAreaScrollPane = new JScrollPane(messageTextArea);
+        add(messageTextAreaScrollPane, "span, growx, wrap");
     }
 
     public void setLogEntry(LogEntry logEntry) {
@@ -66,6 +79,8 @@ public class DetailsPanel extends JPanel {
             bundleLocationTextField.setText(Util.getLocation(logEntry));
             bundleStateTextField.setText(Util.stateToString(logEntry));
             serviceTextField.setText(Util.getService(logEntry));
+            rawLogStringTextField.setText(Util.makeString(logEntry));
+            messageTextArea.setText(logEntry.getMessage());
         }
 //        logEntry.getTime();
 //        logEntry.getBundle().getBundleId();
