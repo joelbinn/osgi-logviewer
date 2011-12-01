@@ -11,6 +11,8 @@ import org.osgi.service.log.LogEntry;
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,6 +27,7 @@ public class LogListPanel extends JPanel {
     {
         setLayout(new MigLayout("", "grow,fill", "grow,fill"));
         logItemTable = new JTable();
+        logItemTable.setAutoscrolls(true);
         JScrollPane scrollPane = new JScrollPane(logItemTable);
         logItemTable.setFillsViewportHeight(true);
         add(scrollPane);
@@ -36,6 +39,7 @@ public class LogListPanel extends JPanel {
         logItemTable.getColumnModel().getColumn(0).setMaxWidth(200);
         logItemTable.getColumnModel().getColumn(1).setMinWidth(50);
         logItemTable.getColumnModel().getColumn(1).setMaxWidth(80);
+        logItemTable.setDefaultRenderer(Object.class, new LogEntryRenderer());
     }
 
     public void addSelectionListener(ListSelectionListener listener) {
@@ -100,15 +104,53 @@ public class LogListPanel extends JPanel {
 
         @Override
         public Object getValueAt(int row, int col) {
+            return filteredLogEntries.get(row);
+        }
+    }
+
+    static class LogEntryRenderer implements TableCellRenderer {
+        private static final Color SAND = new Color(255, 237, 165);
+        private static final Color GREY_SAND = new Color(216, 204, 144);
+        private static final Color LIGHT_BLUE = new Color(186, 229, 255);
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object object, boolean isSelected,
+                                                       boolean hasFocus,
+                                                       int row, int col) {
+            String str;
             switch (col) {
                 case 0:
-                    return Util.timeToString(filteredLogEntries.get(row));
+                    str = Util.timeToString((LogEntry) object);
+                    break;
                 case 1:
-                    return Util.levelToString(filteredLogEntries.get(row));
+                    str = Util.levelToString((LogEntry) object);
+                    break;
                 case 2:
-                    return filteredLogEntries.get(row).getMessage();
+                    str = ((LogEntry) object).getMessage();
+                    break;
+                default:
+                    str = "N/A";
             }
-            return "";
+
+            JLabel cell = new JLabel("" + str);
+
+            if (col == 2) {
+                Font font = new Font("Sans-serif", Font.BOLD, 12);
+                cell.setFont(font);
+            }
+            cell.setOpaque(true);
+
+            if (hasFocus) {
+                cell.setBackground(GREY_SAND);
+            } else if (isSelected) {
+                cell.setBackground(Color.LIGHT_GRAY);
+            } else if ((row % 2) == 0) {
+                cell.setBackground(LIGHT_BLUE);
+            } else {
+                cell.setBackground(Color.WHITE);
+            }
+
+            return cell;
         }
     }
 }
