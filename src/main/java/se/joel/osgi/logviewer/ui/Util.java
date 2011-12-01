@@ -9,6 +9,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogService;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -116,5 +118,17 @@ public class Util {
             "service="+getService(logEntry) + ";" +
             "message="+logEntry.getMessage()
             ;
+    }
+
+    public static String exceptionString(LogEntry logEntry) {
+        if (logEntry == null || logEntry.getException() == null) {
+            return "N/A";
+        }
+
+        Throwable exception = logEntry.getException();
+        StringWriter sw = new StringWriter();
+        exception.printStackTrace(new PrintWriter(sw));
+        sw.flush();
+        return sw.toString();
     }
 }

@@ -20,8 +20,9 @@ public class DetailsPanel extends JPanel {
     private JTextField bundleLocationTextField;
     private JTextField bundleStateTextField;
     private JTextField serviceTextField;
-    private JTextArea messageTextArea;
     private JTextField rawLogStringTextField;
+    private JTextArea messageTextArea;
+    private JTextArea exceptionTextArea;
 
     {
         // Time: <time> Bundle ID: <id> Location: <location> 
@@ -68,19 +69,37 @@ public class DetailsPanel extends JPanel {
         messageTextArea = new JTextArea("");
         messageTextArea.setRows(4);
         messageTextArea.setEditable(false);
+        messageTextArea.setLineWrap(true);
         JScrollPane messageTextAreaScrollPane = new JScrollPane(messageTextArea);
         add(messageTextAreaScrollPane, "span, growx, wrap");
+
+        add(new JLabel("Exception:"));
+        exceptionTextArea = new JTextArea("");
+        exceptionTextArea.setRows(4);
+        exceptionTextArea.setEditable(false);
+        exceptionTextArea.setLineWrap(true);
+        JScrollPane exceptionTextAreaScrollPane = new JScrollPane(exceptionTextArea);
+        add(exceptionTextAreaScrollPane, "span, growx, wrap");
     }
 
     public void setLogEntry(LogEntry logEntry) {
         if (logEntry != null) {
             timeTextField.setText(Util.timeToString(logEntry));
+            timeTextField.setCaretPosition(0);
             bundleIdTextField.setText(Util.getBundleId(logEntry));
+            bundleIdTextField.setCaretPosition(0);
             bundleLocationTextField.setText(Util.getLocation(logEntry));
+            bundleLocationTextField.setCaretPosition(0);
             bundleStateTextField.setText(Util.stateToString(logEntry));
+            bundleStateTextField.setCaretPosition(0);
             serviceTextField.setText(Util.getService(logEntry));
+            serviceTextField.setCaretPosition(0);
             rawLogStringTextField.setText(Util.makeString(logEntry));
+            rawLogStringTextField.setCaretPosition(0);
             messageTextArea.setText(logEntry.getMessage());
+            messageTextArea.setCaretPosition(0);
+            exceptionTextArea.setText(Util.exceptionString(logEntry));
+            exceptionTextArea.setCaretPosition(0);
         }
 //        logEntry.getTime();
 //        logEntry.getBundle().getBundleId();
