@@ -13,8 +13,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -53,8 +52,8 @@ public class LogListPanel extends JPanel {
     public static class LogItemTableModel extends AbstractTableModel {
         private static final Pattern DEFAULT_PATTERN = Pattern.compile(".*");
         private static String[] columnNames = new String[]{"Time", "Level", "Message"};
-        private List<LogEntry> logEntries = new LinkedList<LogEntry>();
-        private List<LogEntry> filteredLogEntries = new ArrayList<LogEntry>();
+        private final List<LogEntry> logEntries = new LinkedList<LogEntry>();
+        private final List<LogEntry> filteredLogEntries = new ArrayList<LogEntry>();
         private Pattern filterPattern = DEFAULT_PATTERN;
 
         public String getColumnName(int col) {
@@ -65,14 +64,18 @@ public class LogListPanel extends JPanel {
         public void addLogEntry(LogEntry logEntry) {
             logEntries.add(logEntry);
             if (filterPattern.matcher(Util.makeString(logEntry)).matches()) {
-                filteredLogEntries.add(logEntry);
-                fireTableDataChanged();
+                synchronized (filteredLogEntries) {
+                    filteredLogEntries.add(logEntry);
+                }
+                fireTableRowsInserted(filteredLogEntries.size() - 2, filteredLogEntries.size() - 1);
             }
         }
 
         public LogEntry getLogEntryAt(int index) {
-            if (0 <= index && index < filteredLogEntries.size()) {
-                return filteredLogEntries.get(index);
+            synchronized (filteredLogEntries) {
+                if (0 <= index && index < filteredLogEntries.size()) {
+                    return filteredLogEntries.get(index);
+                }
             }
             return null;
         }
@@ -83,18 +86,25 @@ public class LogListPanel extends JPanel {
             } else {
                 this.filterPattern = filterPattern;
             }
-            filteredLogEntries.clear();
+            Set<LogEntry> newFilteredLogEntries = new HashSet<LogEntry>();
             for (LogEntry logEntry : logEntries) {
                 if (this.filterPattern.matcher(Util.makeString(logEntry)).matches()) {
-                    filteredLogEntries.add(logEntry);
+                    newFilteredLogEntries.add(logEntry);
                 }
+            }
+
+            synchronized (filteredLogEntries) {
+                filteredLogEntries.clear();
+                filteredLogEntries.addAll(newFilteredLogEntries);
             }
             fireTableDataChanged();
         }
 
         @Override
         public int getRowCount() {
-            return filteredLogEntries.size();
+            synchronized (filteredLogEntries) {
+                return filteredLogEntries.size();
+            }
         }
 
         @Override
@@ -104,7 +114,9 @@ public class LogListPanel extends JPanel {
 
         @Override
         public Object getValueAt(int row, int col) {
-            return filteredLogEntries.get(row);
+            synchronized (filteredLogEntries) {
+                return filteredLogEntries.get(row);
+            }
         }
     }
 
