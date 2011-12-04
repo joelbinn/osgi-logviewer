@@ -14,6 +14,8 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * The log viewer.
@@ -36,7 +38,7 @@ public class LogViewer {
         // addMenuBar(mainFrame);
         mainFrame.setLayout(new MigLayout("", "fill,grow", "[grow 1][fill, grow 100][grow 1]"));
         final DetailsPanel detailsPanel = new DetailsPanel();
-        LogListPanel logListPanel = new LogListPanel();
+        final LogListPanel logListPanel = new LogListPanel();
         listModel = new LogListPanel.LogItemTableModel();
         logListPanel.setModel(listModel);
         FilterEditor filterEditor = new FilterEditor();
@@ -53,10 +55,19 @@ public class LogViewer {
             }
         });
 
+        JButton clearButton = new JButton("Clear");
+        clearButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                logListPanel.clear();
+            }
+        });
 
         mainFrame.getContentPane().add(filterEditor, "span,growx,growprio 0,wrap");
         mainFrame.getContentPane().add(logListPanel, "span,growx,growprio 100,wrap");
-        mainFrame.getContentPane().add(detailsPanel, "span,growx,growprio 0");
+        addSeparator(mainFrame, "Log entry details");
+        mainFrame.getContentPane().add(detailsPanel, "span,growx,growprio 0, wrap");
+        mainFrame.getContentPane().add(clearButton, "grow 0, right");
         mainFrame.setSize(1000, 500);
         mainFrame.setLocation(500, 300);
         mainFrame.setVisible(true);
@@ -81,10 +92,10 @@ public class LogViewer {
         }
     }
 
-    private void addSeparator(JPanel panel, String text) {
+    private void addSeparator(JFrame panel, String text) {
         JLabel l = new JLabel(text);
         l.setForeground(Color.BLUE);
-        panel.add(l, "gapbottom 1, span, split 2, aligny center");
-        panel.add(new JSeparator(), "gapleft rel, growx");
+        panel.getContentPane().add(l, "gapbottom 1, span, split 2, aligny center");
+        panel.getContentPane().add(new JSeparator(), "gapleft rel, growx");
     }
 }

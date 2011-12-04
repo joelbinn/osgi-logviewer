@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
  */
 public class LogListPanel extends JPanel {
     private JTable logItemTable;
+    private LogItemTableModel model;
 
     {
         setLayout(new MigLayout("", "grow,fill", "grow,fill"));
@@ -33,6 +34,7 @@ public class LogListPanel extends JPanel {
     }
 
     public void setModel(LogItemTableModel model) {
+        this.model = model;
         logItemTable.setModel(model);
         logItemTable.getColumnModel().getColumn(0).setMinWidth(180);
         logItemTable.getColumnModel().getColumn(0).setMaxWidth(200);
@@ -49,6 +51,10 @@ public class LogListPanel extends JPanel {
         logItemTable.getSelectionModel().removeListSelectionListener(listener);
     }
 
+    public void clear() {
+        model.clearEntryMap();
+    }
+
     public static class LogItemTableModel extends AbstractTableModel {
         private static final Pattern DEFAULT_PATTERN = Pattern.compile(".*");
         private static String[] columnNames = new String[]{"Time", "Level", "Message"};
@@ -61,14 +67,19 @@ public class LogListPanel extends JPanel {
 
         }
 
-        public void addLogEntry(LogEntry logEntry) {
-            logEntries.add(logEntry);
-            if (filterPattern.matcher(Util.makeString(logEntry)).matches()) {
-                synchronized (filteredLogEntries) {
-                    filteredLogEntries.add(logEntry);
+        public void addLogEntry(final LogEntry logEntry) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    logEntries.add(logEntry);
+                    if (filterPattern.matcher(Util.makeString(logEntry)).matches()) {
+                        synchronized (filteredLogEntries) {
+                            filteredLogEntries.add(logEntry);
+                        }
+                        fireTableRowsInserted(filteredLogEntries.size() - 2, filteredLogEntries.size() - 1);
+                    }
                 }
-                fireTableRowsInserted(filteredLogEntries.size() - 2, filteredLogEntries.size() - 1);
-            }
+            });
         }
 
         public LogEntry getLogEntryAt(int index) {
@@ -80,24 +91,29 @@ public class LogListPanel extends JPanel {
             return null;
         }
 
-        public void setFilter(Pattern filterPattern) {
-            if (filterPattern.toString().length() == 0) {
-                this.filterPattern = DEFAULT_PATTERN;
-            } else {
-                this.filterPattern = filterPattern;
-            }
-            Set<LogEntry> newFilteredLogEntries = new HashSet<LogEntry>();
-            for (LogEntry logEntry : logEntries) {
-                if (this.filterPattern.matcher(Util.makeString(logEntry)).matches()) {
-                    newFilteredLogEntries.add(logEntry);
-                }
-            }
+        public void setFilter(final Pattern filterPattern) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if (filterPattern.toString().length() == 0) {
+                        LogItemTableModel.this.filterPattern = DEFAULT_PATTERN;
+                    } else {
+                        LogItemTableModel.this.filterPattern = filterPattern;
+                    }
+                    Set<LogEntry> newFilteredLogEntries = new HashSet<LogEntry>();
+                    for (LogEntry logEntry : logEntries) {
+                        if (LogItemTableModel.this.filterPattern.matcher(Util.makeString(logEntry)).matches()) {
+                            newFilteredLogEntries.add(logEntry);
+                        }
+                    }
 
-            synchronized (filteredLogEntries) {
-                filteredLogEntries.clear();
-                filteredLogEntries.addAll(newFilteredLogEntries);
-            }
-            fireTableDataChanged();
+                    synchronized (filteredLogEntries) {
+                        filteredLogEntries.clear();
+                        filteredLogEntries.addAll(newFilteredLogEntries);
+                    }
+                    fireTableDataChanged();
+                }
+            });
         }
 
         @Override
@@ -117,6 +133,20 @@ public class LogListPanel extends JPanel {
             synchronized (filteredLogEntries) {
                 return filteredLogEntries.get(row);
             }
+        }
+
+        public void clearEntryMap() {
+            synchronized (filteredLogEntries) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        logEntries.clear();
+                        filteredLogEntries.clear();
+                        fireTableDataChanged();
+                    }
+                });
+            }
+
         }
     }
 
