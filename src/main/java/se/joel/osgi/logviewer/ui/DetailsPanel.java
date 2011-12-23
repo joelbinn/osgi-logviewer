@@ -23,6 +23,7 @@ public class DetailsPanel extends JPanel {
     private JTextField rawLogStringTextField;
     private JTextArea messageTextArea;
     private JTextArea exceptionTextArea;
+    private JTextArea classDetailsTextArea;
 
     {
         // Time: <time> Bundle ID: <id> Location: <location> 
@@ -67,11 +68,19 @@ public class DetailsPanel extends JPanel {
 
         add(new JLabel("Message:"));
         messageTextArea = new JTextArea("");
-        messageTextArea.setRows(4);
+        messageTextArea.setRows(2);
         messageTextArea.setEditable(false);
         messageTextArea.setLineWrap(true);
         JScrollPane messageTextAreaScrollPane = new JScrollPane(messageTextArea);
         add(messageTextAreaScrollPane, "span, growx, wrap");
+
+        add(new JLabel("Class details:"));
+        classDetailsTextArea = new JTextArea("");
+        classDetailsTextArea.setRows(2);
+        classDetailsTextArea.setEditable(false);
+        classDetailsTextArea.setLineWrap(true);
+        JScrollPane classDetailsTextAreaScrollPane = new JScrollPane(classDetailsTextArea);
+        add(classDetailsTextAreaScrollPane, "span, growx, wrap");
 
         add(new JLabel("Exception:"));
         exceptionTextArea = new JTextArea("");
@@ -96,8 +105,14 @@ public class DetailsPanel extends JPanel {
             serviceTextField.setCaretPosition(0);
             rawLogStringTextField.setText(Util.makeString(logEntry));
             rawLogStringTextField.setCaretPosition(0);
-            messageTextArea.setText(logEntry.getMessage());
+            String message = logEntry.getMessage();
+            String[] messageParts = message.split(";;");
+            messageTextArea.setText(messageParts[0]);
             messageTextArea.setCaretPosition(0);
+            if (messageParts.length == 2) {
+                classDetailsTextArea.setText(messageParts[1]);
+                classDetailsTextArea.setCaretPosition(0);
+            }
             exceptionTextArea.setText(Util.exceptionString(logEntry));
             exceptionTextArea.setCaretPosition(0);
         }

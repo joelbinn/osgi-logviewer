@@ -51,7 +51,9 @@ public class LogViewer {
         logListPanel.addSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent listSelectionEvent) {
-                detailsPanel.setLogEntry(listModel.getLogEntryAt(listSelectionEvent.getFirstIndex()));
+                detailsPanel.setLogEntry(
+                    listModel.getLogEntryAt(
+                        ((ListSelectionModel)listSelectionEvent.getSource()).getLeadSelectionIndex()));
             }
         });
 

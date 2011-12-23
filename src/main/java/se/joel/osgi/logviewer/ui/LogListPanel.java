@@ -100,12 +100,21 @@ public class LogListPanel extends JPanel {
                     } else {
                         LogItemTableModel.this.filterPattern = filterPattern;
                     }
-                    Set<LogEntry> newFilteredLogEntries = new HashSet<LogEntry>();
+                    List<LogEntry> newFilteredLogEntries = new ArrayList<LogEntry>();
                     for (LogEntry logEntry : logEntries) {
                         if (LogItemTableModel.this.filterPattern.matcher(Util.makeString(logEntry)).matches()) {
                             newFilteredLogEntries.add(logEntry);
                         }
                     }
+
+                    Collections.sort(newFilteredLogEntries, new Comparator<LogEntry>() {
+                        @Override
+                        public int compare(LogEntry le1, LogEntry le2) {
+                            if (le1.getTime() > le2.getTime()) return 1;
+                            if (le1.getTime() < le2.getTime()) return -1;
+                            return 0;
+                        }
+                    });
 
                     synchronized (filteredLogEntries) {
                         filteredLogEntries.clear();
@@ -168,7 +177,8 @@ public class LogListPanel extends JPanel {
                     str = Util.levelToString((LogEntry) object);
                     break;
                 case 2:
-                    str = ((LogEntry) object).getMessage();
+                    String message = ((LogEntry) object).getMessage();
+                    str = message != null ? message.split(";;")[0] : null;
                     break;
                 default:
                     str = "N/A";

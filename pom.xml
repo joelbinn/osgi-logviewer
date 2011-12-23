@@ -10,6 +10,12 @@
     <packaging>bundle</packaging>
     <name>Log viewer for the OSGi log service.</name>
 
+
+    <properties>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.miglayout</groupId>
